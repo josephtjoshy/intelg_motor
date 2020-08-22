@@ -1,13 +1,13 @@
 #include<WiFi.h>
 #include "esp_wifi.h"
-#include<ip4_addr.h>
+//#include<ip4_addr.h>
 #include "lwip/opt.h"
 #include "lwip/def.h"
 
 
 WiFiClient client;
-wifi_sta_list_t wifi_sta_list;
-tcpip_adapter_sta_list_t adapter_sta_list;
+
+ 
 
 //WiFiServer server(80);
 const uint16_t port = 4010;
@@ -25,7 +25,10 @@ void WiFiEvent(WiFiEvent_t event) {
 
     case SYSTEM_EVENT_AP_STACONNECTED:
       //xEventGroupSetBits(event_group, STA_CONNECTED_BIT);
-      
+      wifi_sta_list_t wifi_sta_list;
+      tcpip_adapter_sta_list_t adapter_sta_list;
+      memset(&wifi_sta_list, 0, sizeof(wifi_sta_list));
+      memset(&adapter_sta_list, 0, sizeof(adapter_sta_list));
       esp_wifi_ap_get_sta_list(&wifi_sta_list);
       tcpip_adapter_get_sta_list(&wifi_sta_list, &adapter_sta_list);
       for (int i = 0; i < adapter_sta_list.num; i++) 
@@ -55,8 +58,7 @@ void setup() {
   WiFi.softAP("Intlq Motor", "123456789");
   WiFi.onEvent(WiFiEvent);
   Serial.print("Waiting for Connections...");
-  
-
+ 
 }
 
 void loop() {
