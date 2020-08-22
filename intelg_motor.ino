@@ -35,6 +35,7 @@ void WiFiEvent(WiFiEvent_t event) {
       {
         tcpip_adapter_sta_info_t station = adapter_sta_list.sta[i];
         Serial.println("device connected");
+        Serial.println(ip4addr_ntoa(&(station.ip))); 
       }
       devConnected = true;
 
