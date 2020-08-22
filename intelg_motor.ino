@@ -1,5 +1,6 @@
 #include<WiFi.h>
 #include "esp_wifi.h"
+//#include<basic_string.h>
 //#include<ip4_addr.h>
 #include "lwip/opt.h"
 #include "lwip/def.h"
@@ -131,7 +132,7 @@ void loop() {
       }
       Serial.println();
       k=k-1;      
-      today=stoi(recivedData[k][0]);
+      today=atoi(recivedData[k]);
       Serial.println(today);
       //Serial.print(line);
       success=true;
