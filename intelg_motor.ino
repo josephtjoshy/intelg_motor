@@ -27,7 +27,7 @@ void WiFiEvent(WiFiEvent_t event) {
       for (int i = 0; i < adapter_sta_list.num; i++) 
       {
         tcpip_adapter_sta_info_t station = adapter_sta_list.sta[i];
-          Serial.println(station.ip);      
+        char c=station.ip;   
       }
       devConnected = true;
 
