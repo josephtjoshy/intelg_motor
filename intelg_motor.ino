@@ -1,6 +1,10 @@
 #include<WiFi.h>
+#include "esp_wifi.h"
 
 WiFiClient client;
+wifi_sta_list_t wifi_sta_list;
+tcpip_adapter_sta_list_t adapter_sta_list;
+
 //WiFiServer server(80);
 const uint16_t port = 4010;
 const char * host = "192.168.4.2"; // ip or dns
@@ -18,6 +22,13 @@ void WiFiEvent(WiFiEvent_t event) {
     case SYSTEM_EVENT_AP_STACONNECTED:
       //xEventGroupSetBits(event_group, STA_CONNECTED_BIT);
       Serial.println("device connected");
+      esp_wifi_ap_get_sta_list(&wifi_sta_list);
+      tcpip_adapter_get_sta_list(&wifi_sta_list, &adapter_sta_list);
+      for (int i = 0; i < adapter_sta_list.num; i++) 
+      {
+        tcpip_adapter_sta_info_t station = adapter_sta_list.sta[i];
+          Serial.println(station.ip);      
+      }
       devConnected = true;
 
       break;
@@ -40,7 +51,7 @@ void setup() {
   WiFi.softAP("Intlq Motor", "123456789");
   WiFi.onEvent(WiFiEvent);
   Serial.print("Waiting for Connections...");
-
+  
 
 }
 
@@ -102,7 +113,7 @@ void loop() {
         Serial.println(recivedData[k]);
       }
       Serial.println(line);
-      
+    
     }
   }
 
