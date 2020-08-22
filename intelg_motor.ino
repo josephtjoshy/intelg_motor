@@ -7,7 +7,7 @@
 
 WiFiClient client;
 bool simplea=false;
- 
+bool success=false;
 
 //WiFiServer server(80);
 const uint16_t port = 4010;
@@ -48,10 +48,11 @@ void WiFiEvent(WiFiEvent_t event) {
     case SYSTEM_EVENT_AP_STADISCONNECTED:
       //xEventGroupSetBits(event_group, STA_DISCONNECTED_BIT);
       Serial.println("device disconnected");
-      devConnected = false;
-      break;
+      devConnected = false;    
+       
 
     default:
+          Serial.println("default");
       break;
   }
 }
@@ -68,8 +69,10 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  int i,j,temp=0,dataTemp=0,spaces=0;
+  int i,j,temp=0,dataTemp=0,spaces=0,k;
+  int hour[50],minutes[50],dmin[50],dsec[50],dmon[50],dtue[50],dwen[50],sthu[50],sfri[50],dsat[50],dsun[50],today;
   char loadchar;
+  
   if (devConnected == true)
   {
     client.connect(host, port);
@@ -99,7 +102,7 @@ void loop() {
           temp++;
         }
       }
-      for(int k=0;k<=temp;k++)
+      for(k=0;k<=temp;k++)
       {
         if(tempReciveData[k]==' ')
         {
@@ -109,7 +112,7 @@ void loop() {
       Serial.print("spaces:");
       Serial.print(spaces);
       dataTemp=0;
-      for(int k=0;k<spaces;k++)
+      for(k=0;k<spaces;k++)
       {
     
         for(int l=0;tempReciveData[dataTemp]!=' ';l++,dataTemp++)
@@ -121,11 +124,27 @@ void loop() {
         {
           dataTemp++;
         }
-        Serial.println(recivedData[k]);
+        Serial.print(recivedData[k]);
+        Serial.print(" ");
+        Serial.print(k);
+        Serial.print(" ");
       }
-      Serial.println(line);
-    
+      Serial.println();
+      //Serial.print(line);
+      success=true;
     }
   }
+//whiledisc:
+if(success==true)
+{
+  if(recivedData[1][0]=='R')
+  {
+    //Serial.println("Reapeated usage");
+  }
+  else if(recivedData[1][0]=='l')
+  {
+    //Serial.println("hourwise usage");
+  }
+}
 
 }
