@@ -1,5 +1,9 @@
 #include<WiFi.h>
 #include "esp_wifi.h"
+#include<ip4_addr.h>
+#include "lwip/opt.h"
+#include "lwip/def.h"
+
 
 WiFiClient client;
 wifi_sta_list_t wifi_sta_list;
@@ -27,7 +31,7 @@ void WiFiEvent(WiFiEvent_t event) {
       for (int i = 0; i < adapter_sta_list.num; i++) 
       {
         tcpip_adapter_sta_info_t station = adapter_sta_list.sta[i];
-        char c=station.ip;   
+          Serial.println(ip4addr_ntoa(&(station.ip))); 
       }
       devConnected = true;
 
