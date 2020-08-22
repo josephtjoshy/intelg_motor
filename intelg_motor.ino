@@ -25,13 +25,13 @@ void WiFiEvent(WiFiEvent_t event) {
 
     case SYSTEM_EVENT_AP_STACONNECTED:
       //xEventGroupSetBits(event_group, STA_CONNECTED_BIT);
-      Serial.println("device connected");
+      
       esp_wifi_ap_get_sta_list(&wifi_sta_list);
       tcpip_adapter_get_sta_list(&wifi_sta_list, &adapter_sta_list);
       for (int i = 0; i < adapter_sta_list.num; i++) 
       {
         tcpip_adapter_sta_info_t station = adapter_sta_list.sta[i];
-          Serial.println(ip4addr_ntoa(&(station.ip))); 
+        Serial.println("device connected");
       }
       devConnected = true;
 
