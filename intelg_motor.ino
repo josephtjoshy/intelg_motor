@@ -130,6 +130,9 @@ void loop() {
         Serial.print(" ");
       }
       Serial.println();
+      k=k-1;      
+      today=stoi(recivedData[k][0]);
+      Serial.println(today);
       //Serial.print(line);
       success=true;
     }
