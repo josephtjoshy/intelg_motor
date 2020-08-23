@@ -108,7 +108,6 @@ void loop()
 			Serial.println(line);
 			for (i = 0; line[i] != '\0'; i++)
 			{
-
 			}
 			for (j = 0; j < i; j++)
 			{
