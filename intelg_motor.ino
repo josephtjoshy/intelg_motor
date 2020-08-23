@@ -63,7 +63,7 @@ void WiFiEvent(WiFiEvent_t event)
 		tcpip_adapter_get_sta_list(&wifi_sta_list, &adapter_sta_list);
 		for (int i = 0; i < adapter_sta_list.num; i++)
 		{
-			tcpip_adapter_sta_info_t station = adapter_sta_list.sta[i];
+			tcpip_adapter_sta_info_t station = adapter_sta_list.sta[0];
 			Serial.println("device connected");
 			host = ip4addr_ntoa(&(station.ip));
 		}
@@ -103,7 +103,7 @@ void loop()
 		client.connect(host, port);
 		if (client.available())
 		{
-			temp = 0;
+			temp = 0,spaces=0;
 			line = client.readStringUntil('\r');
 			Serial.println(line);
 			for (i = 0; line[i] != '\0'; i++)
@@ -177,7 +177,7 @@ void loop()
 		}
 	}
 	//whiledisc:
-	/*
+	
 	if (success == true)
 	{
 		if (recivedData[1][0] == 'R')
@@ -215,5 +215,5 @@ void loop()
 	}
 
 	new_time = millis();
-	*/
+	
 }
