@@ -105,6 +105,8 @@ void loop()
 		{
 			temp = 0,spaces=0;
 			line = client.readStringUntil('\r');
+			memset(tempReciveData,0,sizeof tempReciveData); 
+			memset(recivedData,0,sizeof recivedData); 
 			Serial.println(line);
 			for (i = 0; line[i] != '\0'; i++)
 			{
