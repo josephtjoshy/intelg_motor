@@ -53,6 +53,7 @@ void CalTime()
 
 void WiFiEvent(WiFiEvent_t event)
 {
+	new_time=new_time + (millis()-new_time);
 	switch (event)
 	{
 
@@ -84,7 +85,7 @@ void WiFiEvent(WiFiEvent_t event)
 
 	case SYSTEM_EVENT_AP_STADISCONNECTED:
 		//xEventGroupSetBits(event_group, STA_DISCONNECTED_BIT);
-		new_time = millis();
+		new_time =new_time + millis();
 		Serial.println("device disconnected");
 		devConnected = false;
 
@@ -106,7 +107,7 @@ void setup()
 
 void loop()
 {
-
+	new_time=new_time + (millis()-new_time);
 	// put your main code here, to run repeatedly:
 
 	if (devConnected == true)
@@ -249,11 +250,11 @@ void loop()
 		{
 			
 			delay(100);
-			diff_time =diff_time + (new_time - old_time);			
+			diff_time =(new_time - old_time);			
 			MotorOnSec=MotorOnSec-(diff_time/1000);		
 		
 			old_time = new_time;
-			
+			new_time=millis();
 			Serial.print("dif");
 			Serial.println(diff_time);
 			
@@ -261,7 +262,7 @@ void loop()
 			if(timeInMin%5==0)
 			{
 				timeInMin++;
-				timeInSec+=5;
+				timeInSec+=30;
 			}		
 			CalTime();
 			
@@ -295,5 +296,5 @@ void loop()
 	}
 
 	
-new_time = millis();	
+new_time=new_time + (millis()-new_time);
 }
