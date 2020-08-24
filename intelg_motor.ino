@@ -14,8 +14,8 @@ char tempReciveData[5000], recivedData[500][10];
 int i, j, temp = 0, dataTemp = 0, spaces = 0, k, Rtemp = 0;
 int hour[50], minutes[50], dmin[50], dsec[50], dmon[50], dtue[50], dwen[50], dthu[50], dfri[50], dsat[50], dsun[50], today;
 int rOn = 0, rOf = 0, timeInHour = 0, timeInMin = 0,timingNo,timingTemp[50],MotorOnMin=0,MotorOnSec=0;
-unsigned long old_time = 0,tempTime=0;
-unsigned long new_time, add_time, diff_time;
+unsigned long old_time = 0;
+unsigned long new_time=0,diff_time=0;
 float timeInSec = 0;
 
 void CalTime()
@@ -25,6 +25,12 @@ void CalTime()
 		
 		timeInMin++;
 		MotorOnMin--;
+		timeInSec=0;
+	}
+	if(timeInMin>59)
+	{
+		timeInMin=0;
+		timeInHour++;
 	}	
 	if (timeInHour > 23)
 	{
@@ -218,7 +224,7 @@ void loop()
 			delay(100);
 			diff_time = diff_time + (new_time - old_time);
 			old_time = new_time;
-			new_time = millis();
+			
 			if (diff_time > 1000)
 			{
 				Rtemp = Rtemp + (diff_time / 1000);
@@ -243,25 +249,22 @@ void loop()
 		{
 			
 			delay(100);
-			add_time = add_time + (new_time - old_time);
-			tempTime=tempTime+(new_time-old_time);
-			if((tempTime/1000)>=1)
-			{
-				MotorOnSec--;
-				tempTime=0;
-			}
+			diff_time =diff_time + (new_time - old_time);			
+			MotorOnSec=MotorOnSec-(diff_time/1000);		
+		
 			old_time = new_time;
-			new_time = millis();
-			Serial.print("add");
-			Serial.println(add_time);
-			timeInSec = add_time / 1000;
-			timeInMin=(add_time/1000)/60;
-			timeInHour=timeInHour+((add_time/1000)/3600);
-			if(timeInHour%2==0)
+			
+			Serial.print("dif");
+			Serial.println(diff_time);
+			
+			timeInSec =timeInSec+(diff_time / 1000);			
+			if(timeInMin%5==0)
 			{
-				add_time=0;
-			}			
+				timeInMin++;
+				timeInSec+=5;
+			}		
 			CalTime();
+			
 			Serial.print(timeInHour);
 			Serial.print(":");
 			Serial.print(timeInMin);
@@ -292,5 +295,5 @@ void loop()
 	}
 
 	
-	
+new_time = millis();	
 }
