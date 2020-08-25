@@ -13,51 +13,48 @@ bool devConnected = false;
 char tempReciveData[5000], recivedData[500][10];
 int i, j, temp = 0, dataTemp = 0, spaces = 0, k, Rtemp = 0;
 int hour[50], minutes[50], dmin[50], dsec[50], dmon[50], dtue[50], dwen[50], dthu[50], dfri[50], dsat[50], dsun[50], today;
-int rOn = 0, rOf = 0, timeInHour = 0, timeInMin = 0,timingNo,timingTemp[50],MotorOnMin=0,MotorOnSec=0;
-unsigned long old_time = 0;
-unsigned long new_time=0,diff_time=0;
+int rOn = 0, rOf = 0, timeInHour = 0, timeInMin = 0, timingNo, timingTemp[50], MotorOnMin = 0, MotorOnSec = 0;
+unsigned long  timeInMilliseconds;
+unsigned long  diff_time = 0,new_time=0;
 float timeInSec = 0;
-
+int timeInHourtemp=0;
+int sec=0;
 void CalTime()
 {
-	if (timeInSec > 59)
+	
+	
+	if (timeInHour==0 && timeInHourtemp==0)
 	{
-		
-		timeInMin++;
-		MotorOnMin--;
-		timeInSec=0;
-	}
-	if(timeInMin>59)
-	{
-		timeInMin=0;
-		timeInHour++;
-	}	
-	if (timeInHour > 23)
-	{
-		timeInHour = 0;
+		timeInHourtemp=1;
+		//timeInHour = 0;
+		timeInMilliseconds=0;
 		today++;
-		for(int a=0;a<timingNo;a++)
+		for (int a = 0; a < timingNo; a++)
 		{
-			timingTemp[a]=1;
+			timingTemp[a] = 1;
 		}
+	}
+	if(timeInHour>0)
+	{
+		timeInHourtemp==0;
 	}
 	if (today > 7)
 	{
 		today = 1;
 	}
-	if(MotorOnMin<1)
+	if (MotorOnMin < 1)
 	{
-		MotorOnMin=0;
+		MotorOnMin = 0;
 	}
-	if(MotorOnSec<1)
+	if (MotorOnSec < 1)
 	{
-		MotorOnSec=0;
+		MotorOnSec = 0;
 	}
 }
 
 void WiFiEvent(WiFiEvent_t event)
 {
-	new_time=new_time + (millis()-new_time);
+	
 	switch (event)
 	{
 
@@ -89,7 +86,8 @@ void WiFiEvent(WiFiEvent_t event)
 
 	case SYSTEM_EVENT_AP_STADISCONNECTED:
 		//xEventGroupSetBits(event_group, STA_DISCONNECTED_BIT);
-		new_time =new_time + millis();
+		timeInMin += 5;
+		CalTime();
 		Serial.println("device disconnected");
 		devConnected = false;
 
@@ -102,6 +100,7 @@ void WiFiEvent(WiFiEvent_t event)
 void setup()
 {
 	// put your setup code here, to run o
+	new_time=millis();
 	Serial.begin(115200);
 	Serial.println("ESP32 Starting");
 	WiFi.softAP("Intlq Motor", "123456789");
@@ -111,18 +110,16 @@ void setup()
 
 void loop()
 {
-	new_time=new_time + (millis()-new_time);
-	// put your main code here, to run repeatedly:
-
+	
 	if (devConnected == true)
 	{
 		client.connect(host, port);
 		if (client.available())
 		{
-			temp = 0,spaces=0;
+			temp = 0, spaces = 0;
 			line = client.readStringUntil('\r');
-			memset(tempReciveData,0,sizeof tempReciveData); 
-			memset(recivedData,0,sizeof recivedData); 
+			memset(tempReciveData, 0, sizeof tempReciveData);
+			memset(recivedData, 0, sizeof recivedData);
 			Serial.println(line);
 			for (i = 0; line[i] != '\0'; i++)
 			{
@@ -133,13 +130,13 @@ void loop()
 				{
 					continue;
 				}
-				if (line[j] != '[' && line[j] != ']' && line[j] != '.' && line[j] != ',' && line[j]!='-' && line[j]!=':')
+				if (line[j] != '[' && line[j] != ']' && line[j] != '.' && line[j] != ',' && line[j] != '-' && line[j] != ':')
 				{
 					tempReciveData[temp] = line[j];
 					//Serial.print(tempReciveData[temp]);
 					temp++;
 				}
-				if (line[j] == '[' || line[j] == ']' || line[j] == '.' || line[j] == ',' || line[j]=='-' || line[j]==':')
+				if (line[j] == '[' || line[j] == ']' || line[j] == '.' || line[j] == ',' || line[j] == '-' || line[j] == ':')
 				{
 					tempReciveData[temp] = ' ';
 					//Serial.print(tempReciveData[temp]);
@@ -175,7 +172,6 @@ void loop()
 			Serial.println();
 
 			k = k - 1;
-			new_time = millis();
 
 			if (recivedData[1][0] == 'R')
 			{
@@ -187,72 +183,73 @@ void loop()
 			{
 				//Serial.println("hourwise usage");
 				today = atoi(recivedData[k]);
-				timeInSec=atoi(recivedData[k-2]);
-				timeInMin=atoi(recivedData[k-3]);
-				timeInHour=atoi(recivedData[k-4]);
-				int rem1=timeInHour%10;
-				timeInHour=timeInHour/10;
-				int rem2=timeInHour%10;
-				timeInHour=(rem2*10)+rem1;
-				timingNo=(k-8)/11;
-				memset(hour,0,sizeof hour); 
-				memset(minutes,0,sizeof minutes); 
-				memset(dmin,0,sizeof dmin); 
-				memset(dsec,0,sizeof dsec); 
-				memset(dmon,0,sizeof dmon); 
-				memset(dtue,0,sizeof dtue); 
-				memset(dwen,0,sizeof dwen); 
-				memset(dthu,0,sizeof dthu); 
-				memset(dfri,0,sizeof dfri); 
-				memset(dsat,0,sizeof dsat); 
-				memset(dsun,0,sizeof dsun); 
-				memset(timingTemp,0,sizeof timingTemp); 
-				for(int f=0,g=2;f<timingNo;f++,g+=11)
+				timeInSec = atoi(recivedData[k - 2]);
+				timeInMin = atoi(recivedData[k - 3]);
+				timeInHour = atoi(recivedData[k - 4]);
+				int rem1 = timeInHour % 10;
+				timeInHour = timeInHour / 10;
+				int rem2 = timeInHour % 10;
+				timeInHour = (rem2 * 10) + rem1;
+				timingNo = (k - 8) / 11;
+				memset(hour, 0, sizeof hour);
+				memset(minutes, 0, sizeof minutes);
+				memset(dmin, 0, sizeof dmin);
+				memset(dsec, 0, sizeof dsec);
+				memset(dmon, 0, sizeof dmon);
+				memset(dtue, 0, sizeof dtue);
+				memset(dwen, 0, sizeof dwen);
+				memset(dthu, 0, sizeof dthu);
+				memset(dfri, 0, sizeof dfri);
+				memset(dsat, 0, sizeof dsat);
+				memset(dsun, 0, sizeof dsun);
+				memset(timingTemp, 0, sizeof timingTemp);
+				for (int f = 0, g = 2; f < timingNo; f++, g += 11)
 				{
-					hour[f]=atoi(recivedData[g]);
-					minutes[f]=atoi(recivedData[g+1]);
-					dmin[f]=atoi(recivedData[g+2]);
-					dsec[f]=atoi(recivedData[g+3]);
-					dmon[f]=atoi(recivedData[g+4]);
-					dtue[f]=atoi(recivedData[g+5]);
-					dwen[f]=atoi(recivedData[g+6]);
-					dthu[f]=atoi(recivedData[g+7]);
-					dfri[f]=atoi(recivedData[g+8]);
-					dsat[f]=atoi(recivedData[g+9]);
-					dsun[f]=atoi(recivedData[g+10]);
-					timingTemp[f]=1;
-					if(dmon[f]==1)
+					hour[f] = atoi(recivedData[g]);
+					minutes[f] = atoi(recivedData[g + 1]);
+					dmin[f] = atoi(recivedData[g + 2]);
+					dsec[f] = atoi(recivedData[g + 3]);
+					dmon[f] = atoi(recivedData[g + 4]);
+					dtue[f] = atoi(recivedData[g + 5]);
+					dwen[f] = atoi(recivedData[g + 6]);
+					dthu[f] = atoi(recivedData[g + 7]);
+					dfri[f] = atoi(recivedData[g + 8]);
+					dsat[f] = atoi(recivedData[g + 9]);
+					dsun[f] = atoi(recivedData[g + 10]);
+					timingTemp[f] = 1;
+					if (dmon[f] == 1)
 					{
-						dmon[f]=1;
+						dmon[f] = 1;
 					}
-					if(dtue[f]==1)
-					{						
-						dtue[f]=2;
-					}
-					if(dwen[f]==1)
+					if (dtue[f] == 1)
 					{
-						dwen[f]=3;
+						dtue[f] = 2;
 					}
-					if(dthu[f]==1)
+					if (dwen[f] == 1)
 					{
-						dthu[f]=4;
+						dwen[f] = 3;
 					}
-					if(dfri[f]==1)
+					if (dthu[f] == 1)
 					{
-						dfri[f]=5;
+						dthu[f] = 4;
 					}
-					if(dsat[f]==1)
+					if (dfri[f] == 1)
 					{
-						dsat[f]=6;
+						dfri[f] = 5;
 					}
-					if(dsun[f]==1)
+					if (dsat[f] == 1)
 					{
-						dsun[f]=7;
+						dsat[f] = 6;
+					}
+					if (dsun[f] == 1)
+					{
+						dsun[f] = 7;
 					}
 				}
 
-
-				
+				timeInMilliseconds = timeInHour * 3600000;
+				timeInMilliseconds = timeInMilliseconds + (timeInMin * 60000);
+				timeInMilliseconds = timeInMilliseconds + (timeInSec * 1000);
 			}
 
 			//Serial.println(today);
@@ -261,15 +258,14 @@ void loop()
 		}
 	}
 	//whiledisc:
-	
+
 	if (success == true)
 	{
 		if (recivedData[1][0] == 'R')
 		{
 			delay(100);
-			diff_time = diff_time + (new_time - old_time);
-			old_time = new_time;
-			
+			diff_time = diff_time + (millis() -new_time);
+
 			if (diff_time > 1000)
 			{
 				Rtemp = Rtemp + (diff_time / 1000);
@@ -293,41 +289,52 @@ void loop()
 		else if (recivedData[1][0] == 'l')
 		{
 			
+
 			delay(100);
-			diff_time =(new_time - old_time);			
-			MotorOnSec=MotorOnSec-(diff_time/1000);		
-		
-			old_time = new_time;
-			new_time=millis();			
-			
-			timeInSec =timeInSec+(diff_time / 1000);			
-			if(timeInMin%5==0)
+			diff_time = diff_time+(millis() - new_time);
+			if(diff_time>1000)
 			{
-				timeInMin++;
-				timeInSec+=30;
-			}		
-			CalTime();
+				sec++;
+				diff_time=0;
+				MotorOnSec--;				
+				
+			}
+			if(sec>59)
+			{
+				sec=0;
+				MotorOnMin--;
+			}
 			
+
+			//new_time=millis();
+
+			timeInHour = ((timeInMilliseconds+new_time) / 3600000)%24;
+			timeInMin = ((timeInMilliseconds+new_time) / 60000) % 60;
+			timeInSec = ((timeInMilliseconds+new_time )/ 1000) % 60;
+			CalTime();
+
 			Serial.print(timeInHour);
 			Serial.print(":");
 			Serial.print(timeInMin);
 			Serial.print(":");
 			Serial.print(timeInSec);
 			Serial.print(" ");
-			Serial.println(today);
-			for(int f=0;f<timingNo;f++)
+			Serial.print(MotorOnMin);
+			Serial.print(" ");
+			Serial.println(MotorOnSec);
+			for (int f = 0; f < timingNo; f++)
 			{
-				if(timeInHour>=hour[f] && timingTemp[f]==1 &&(dmon[f]==today || dtue[f]==today || dwen[f]==today|| dthu[f]==today || dfri[f]==today || dsat[f]==today || dsun[f]==today))
+				if (timeInHour >= hour[f] && timingTemp[f] == 1 && (dmon[f] == today || dtue[f] == today || dwen[f] == today || dthu[f] == today || dfri[f] == today || dsat[f] == today || dsun[f] == today))
 				{
-					if(timeInMin>=minutes[f])
+					if (timeInMin >= minutes[f])
 					{
-						MotorOnMin=dmin[f];
-						MotorOnSec=dsec[f];
-						timingTemp[f]=0;
+						MotorOnMin = dmin[f];
+						MotorOnSec = dsec[f];
+						timingTemp[f] = 0;
 					}
 				}
 			}
-			if(MotorOnSec>0 || MotorOnMin>0)
+			if (MotorOnSec > 0 || MotorOnMin > 0)
 			{
 				Serial.println("Motor On");
 			}
@@ -335,10 +342,7 @@ void loop()
 			{
 				Serial.println("Motor off");
 			}
-			
 		}
 	}
-
-	
-new_time=new_time + (millis()-new_time);
+	new_time=millis();
 }
