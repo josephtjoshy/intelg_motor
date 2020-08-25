@@ -36,6 +36,10 @@ void CalTime()
 	{
 		timeInHour = 0;
 		today++;
+		for(int a=0;a<timingNo;a++)
+		{
+			timingTemp[a]=1;
+		}
 	}
 	if (today > 7)
 	{
@@ -191,6 +195,18 @@ void loop()
 				int rem2=timeInHour%10;
 				timeInHour=(rem2*10)+rem1;
 				timingNo=(k-8)/11;
+				memset(hour,0,sizeof hour); 
+				memset(minutes,0,sizeof minutes); 
+				memset(dmin,0,sizeof dmin); 
+				memset(dsec,0,sizeof dsec); 
+				memset(dmon,0,sizeof dmon); 
+				memset(dtue,0,sizeof dtue); 
+				memset(dwen,0,sizeof dwen); 
+				memset(dthu,0,sizeof dthu); 
+				memset(dfri,0,sizeof dfri); 
+				memset(dsat,0,sizeof dsat); 
+				memset(dsun,0,sizeof dsun); 
+				memset(timingTemp,0,sizeof timingTemp); 
 				for(int f=0,g=2;f<timingNo;f++,g+=11)
 				{
 					hour[f]=atoi(recivedData[g]);
@@ -205,6 +221,34 @@ void loop()
 					dsat[f]=atoi(recivedData[g+9]);
 					dsun[f]=atoi(recivedData[g+10]);
 					timingTemp[f]=1;
+					if(dmon[f]==1)
+					{
+						dmon[f]=1;
+					}
+					if(dtue[f]==1)
+					{						
+						dtue[f]=2;
+					}
+					if(dwen[f]==1)
+					{
+						dwen[f]=3;
+					}
+					if(dthu[f]==1)
+					{
+						dthu[f]=4;
+					}
+					if(dfri[f]==1)
+					{
+						dfri[f]=5;
+					}
+					if(dsat[f]==1)
+					{
+						dsat[f]=6;
+					}
+					if(dsun[f]==1)
+					{
+						dsun[f]=7;
+					}
 				}
 
 
@@ -254,9 +298,7 @@ void loop()
 			MotorOnSec=MotorOnSec-(diff_time/1000);		
 		
 			old_time = new_time;
-			new_time=millis();
-			Serial.print("dif");
-			Serial.println(diff_time);
+			new_time=millis();			
 			
 			timeInSec =timeInSec+(diff_time / 1000);			
 			if(timeInMin%5==0)
@@ -270,12 +312,14 @@ void loop()
 			Serial.print(":");
 			Serial.print(timeInMin);
 			Serial.print(":");
-			Serial.println(timeInSec);
+			Serial.print(timeInSec);
+			Serial.print(" ");
+			Serial.println(today);
 			for(int f=0;f<timingNo;f++)
 			{
-				if(timeInHour>=hour[f] && timingTemp[f]==1)
+				if(timeInHour>=hour[f] && timingTemp[f]==1 &&(dmon[f]==today || dtue[f]==today || dwen[f]==today|| dthu[f]==today || dfri[f]==today || dsat[f]==today || dsun[f]==today))
 				{
-					if(timeInMin>minutes[f])
+					if(timeInMin>=minutes[f])
 					{
 						MotorOnMin=dmin[f];
 						MotorOnSec=dsec[f];
