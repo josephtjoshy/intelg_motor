@@ -19,6 +19,8 @@ unsigned long  diff_time = 0,new_time=0;
 float timeInSec = 0;
 int timeInHourtemp=0;
 int sec=0;
+int powerled=13,reciveled=12,motor=15;
+bool powerledbool=true;
 void CalTime()
 {
 	
@@ -86,7 +88,7 @@ void WiFiEvent(WiFiEvent_t event)
 
 	case SYSTEM_EVENT_AP_STADISCONNECTED:
 		//xEventGroupSetBits(event_group, STA_DISCONNECTED_BIT);
-		
+		digitalWrite(powerled,HIGH);
 		Serial.println("device disconnected");
 		devConnected = false;
 
@@ -99,7 +101,12 @@ void WiFiEvent(WiFiEvent_t event)
 void setup()
 {
 	// put your setup code here, to run o
-	
+	pinMode(powerled,OUTPUT);
+	pinMode(reciveled,OUTPUT);
+	pinMode(motor,OUTPUT);
+	digitalWrite(motor,HIGH);
+	digitalWrite(powerled,powerledbool);
+	digitalWrite(reciveled,LOW);
 	Serial.begin(115200);
 	Serial.println("ESP32 Starting");
 	WiFi.softAP("Intlq Motor", "123456789");
@@ -109,6 +116,8 @@ void setup()
 
 void loop()
 {
+	powerledbool=!powerledbool;
+	digitalWrite(powerled,powerledbool);
 	new_time=millis()-ref_time;
 	old_time=millis();	
 	if (devConnected == true)
@@ -116,6 +125,8 @@ void loop()
 		client.connect(host, port);
 		if (client.available())
 		{
+			
+			digitalWrite(reciveled,HIGH);
 			temp = 0, spaces = 0;
 			line = client.readStringUntil('\r');
 			memset(tempReciveData, 0, sizeof tempReciveData);
@@ -263,6 +274,8 @@ void loop()
 			//Serial.println(today);
 			//Serial.print(line);
 			success = true;
+			delay(100);
+			digitalWrite(reciveled,LOW);
 		}
 	}
 	//whiledisc:
@@ -287,11 +300,13 @@ void loop()
 			{
 				Serial.print(Rtemp);
 				Serial.println("Motor On");
+				digitalWrite(motor,LOW);
 			}
 			if (Rtemp > rOn)
 			{
 				Serial.print(Rtemp);
 				Serial.println("Motor off");
+				digitalWrite(motor,HIGH);
 			}
 		}
 		else if (recivedData[1][0] == 'l')
@@ -354,10 +369,12 @@ void loop()
 			if (MotorOnSec > 0 || MotorOnMin > 0)
 			{
 				Serial.println("Motor On");
+				digitalWrite(motor,LOW);
 			}
 			else
 			{
 				Serial.println("Motor off");
+				digitalWrite(motor,HIGH);
 			}
 		}
 	}
