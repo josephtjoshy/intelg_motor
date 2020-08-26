@@ -89,6 +89,7 @@ void WiFiEvent(WiFiEvent_t event)
 	case SYSTEM_EVENT_AP_STADISCONNECTED:
 		//xEventGroupSetBits(event_group, STA_DISCONNECTED_BIT);
 		digitalWrite(powerled,HIGH);
+		digitalWrite(motor,LOW);
 		Serial.println("device disconnected");
 		devConnected = false;
 
