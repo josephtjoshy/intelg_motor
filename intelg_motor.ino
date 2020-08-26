@@ -14,7 +14,7 @@ char tempReciveData[5000], recivedData[500][10];
 int i, j, temp = 0, dataTemp = 0, spaces = 0, k, Rtemp = 0;
 int hour[50], minutes[50], dmin[50], dsec[50], dmon[50], dtue[50], dwen[50], dthu[50], dfri[50], dsat[50], dsun[50], today;
 int rOn = 0, rOf = 0, timeInHour = 0, timeInMin = 0, timingNo, timingTemp[50], MotorOnMin = 0, MotorOnSec = 0;
-unsigned long  timeInMilliseconds;
+unsigned long  timeInMilliseconds,ref_time,old_time=0;
 unsigned long  diff_time = 0,new_time=0;
 float timeInSec = 0;
 int timeInHourtemp=0;
@@ -86,8 +86,7 @@ void WiFiEvent(WiFiEvent_t event)
 
 	case SYSTEM_EVENT_AP_STADISCONNECTED:
 		//xEventGroupSetBits(event_group, STA_DISCONNECTED_BIT);
-		timeInMin += 5;
-		CalTime();
+		
 		Serial.println("device disconnected");
 		devConnected = false;
 
@@ -100,7 +99,7 @@ void WiFiEvent(WiFiEvent_t event)
 void setup()
 {
 	// put your setup code here, to run o
-	new_time=millis();
+	
 	Serial.begin(115200);
 	Serial.println("ESP32 Starting");
 	WiFi.softAP("Intlq Motor", "123456789");
@@ -110,7 +109,8 @@ void setup()
 
 void loop()
 {
-	
+	new_time=millis()-ref_time;
+	old_time=millis();	
 	if (devConnected == true)
 	{
 		client.connect(host, port);
@@ -121,6 +121,7 @@ void loop()
 			memset(tempReciveData, 0, sizeof tempReciveData);
 			memset(recivedData, 0, sizeof recivedData);
 			Serial.println(line);
+			ref_time=millis();
 			for (i = 0; line[i] != '\0'; i++)
 			{
 			}
@@ -203,6 +204,11 @@ void loop()
 				memset(dsat, 0, sizeof dsat);
 				memset(dsun, 0, sizeof dsun);
 				memset(timingTemp, 0, sizeof timingTemp);
+
+				timeInMilliseconds = timeInHour * 3600000;
+				timeInMilliseconds = timeInMilliseconds + (timeInMin * 60000);
+				timeInMilliseconds = timeInMilliseconds + (timeInSec * 1000);
+
 				for (int f = 0, g = 2; f < timingNo; f++, g += 11)
 				{
 					hour[f] = atoi(recivedData[g]);
@@ -245,11 +251,13 @@ void loop()
 					{
 						dsun[f] = 7;
 					}
+					if(timeInMilliseconds>( (hour[f]*3600000) +(minutes[f]*60000)))
+					{						
+						timingTemp[f]=0;
+					}
 				}
 
-				timeInMilliseconds = timeInHour * 3600000;
-				timeInMilliseconds = timeInMilliseconds + (timeInMin * 60000);
-				timeInMilliseconds = timeInMilliseconds + (timeInSec * 1000);
+				
 			}
 
 			//Serial.println(today);
@@ -264,7 +272,7 @@ void loop()
 		if (recivedData[1][0] == 'R')
 		{
 			delay(100);
-			diff_time = diff_time + (millis() -new_time);
+			diff_time = diff_time + (millis() -old_time);
 
 			if (diff_time > 1000)
 			{
@@ -291,11 +299,11 @@ void loop()
 			
 
 			delay(100);
-			diff_time = diff_time+(millis() - new_time);
+			diff_time = diff_time+(millis() - old_time);
 			if(diff_time>1000)
 			{
-				sec++;
-				diff_time=0;
+				sec = sec + (diff_time / 1000);
+				diff_time = 0;
 				MotorOnSec--;				
 				
 			}
@@ -311,19 +319,27 @@ void loop()
 			timeInHour = ((timeInMilliseconds+new_time) / 3600000)%24;
 			timeInMin = ((timeInMilliseconds+new_time) / 60000) % 60;
 			timeInSec = ((timeInMilliseconds+new_time )/ 1000) % 60;
-			CalTime();
+			
 
 			Serial.print(timeInHour);
 			Serial.print(":");
 			Serial.print(timeInMin);
 			Serial.print(":");
 			Serial.print(timeInSec);
-			Serial.print(" ");
+			Serial.print("  onmin ");			
 			Serial.print(MotorOnMin);
-			Serial.print(" ");
-			Serial.println(MotorOnSec);
+			Serial.print("  onsec ");
+			Serial.print(MotorOnSec);
+			CalTime();
 			for (int f = 0; f < timingNo; f++)
 			{
+				Serial.print(" on hour ");
+				Serial.print(hour[f]);
+				Serial.print(" on min ");
+				Serial.print(minutes[f]);
+				Serial.print(" temp ");
+				Serial.print(timingTemp[f]);
+
 				if (timeInHour >= hour[f] && timingTemp[f] == 1 && (dmon[f] == today || dtue[f] == today || dwen[f] == today || dthu[f] == today || dfri[f] == today || dsat[f] == today || dsun[f] == today))
 				{
 					if (timeInMin >= minutes[f])
@@ -334,6 +350,7 @@ void loop()
 					}
 				}
 			}
+			Serial.println();
 			if (MotorOnSec > 0 || MotorOnMin > 0)
 			{
 				Serial.println("Motor On");
@@ -344,5 +361,5 @@ void loop()
 			}
 		}
 	}
-	new_time=millis();
+	new_time=millis()-ref_time;
 }
