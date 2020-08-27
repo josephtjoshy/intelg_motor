@@ -330,7 +330,7 @@ void loop()
 			}
 			
 
-			//new_time=millis();
+			new_time=millis()-ref_time;
 
 			timeInHour = ((timeInMilliseconds+new_time) / 3600000)%24;
 			timeInMin = ((timeInMilliseconds+new_time) / 60000) % 60;
