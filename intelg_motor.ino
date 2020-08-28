@@ -19,7 +19,7 @@ unsigned long  diff_time = 0,new_time=0;
 float timeInSec = 0;
 int timeInHourtemp=0;
 int sec=0;
-int powerled=13,reciveled=12,motor=15;
+int powerled=13,reciveled=12,motor=15,power=2;
 bool powerledbool=true;
 void CalTime()
 {
@@ -89,7 +89,7 @@ void WiFiEvent(WiFiEvent_t event)
 	case SYSTEM_EVENT_AP_STADISCONNECTED:
 		//xEventGroupSetBits(event_group, STA_DISCONNECTED_BIT);
 		digitalWrite(powerled,HIGH);
-		digitalWrite(motor,LOW);
+		digitalWrite(motor,HIGH);
 		Serial.println("device disconnected");
 		devConnected = false;
 
@@ -106,6 +106,8 @@ void setup()
 	pinMode(reciveled,OUTPUT);
 	pinMode(motor,OUTPUT);
 	digitalWrite(motor,HIGH);
+	pinMode(power,OUTPUT);
+	digitalWrite(power,HIGH);
 	digitalWrite(powerled,powerledbool);
 	digitalWrite(reciveled,LOW);
 	Serial.begin(115200);
