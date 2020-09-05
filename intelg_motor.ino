@@ -83,7 +83,7 @@ void WiFiEvent(WiFiEvent_t event)
 		}
 
 		devConnected = true;
-
+			
 		break;
 
 	case SYSTEM_EVENT_AP_STADISCONNECTED:
@@ -277,6 +277,7 @@ void loop()
 			//Serial.println(today);
 			//Serial.print(line);
 			success = true;
+			devConnected=false;
 			delay(100);
 			digitalWrite(reciveled,LOW);
 		}
@@ -348,6 +349,8 @@ void loop()
 			Serial.print(MotorOnMin);
 			Serial.print("  onsec ");
 			Serial.print(MotorOnSec);
+			Serial.print("  sec  ");
+			Serial.print(sec);
 			CalTime();
 			for (int f = 0; f < timingNo; f++)
 			{
@@ -365,6 +368,7 @@ void loop()
 						MotorOnMin = dmin[f];
 						MotorOnSec = dsec[f];
 						timingTemp[f] = 0;
+						sec=0;
 					}
 				}
 			}
